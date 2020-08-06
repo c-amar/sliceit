@@ -3,7 +3,7 @@
    remote_user: amar
    become: yes
    tasks:
-     - include_vars: nginx_server_vars.yml
+     - include_vars: var.yml
      - name: Install nginx
        yum:
          name: nginx
@@ -25,7 +25,7 @@
    remote_user: amar
    become: yes
    tasks:
-     - include_vars: app_server_vars.yml
+     - include_vars: var.yml
      - name: Install required packages
        yum:
          name: ['python3', 'python3-setuptool', 'python-setuptools']
