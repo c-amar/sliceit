@@ -46,5 +46,7 @@ Example:
 [app_server]
 192.168.99.102
 ```
-4. Run the ansible playbook ansible/deploy.yml
-`cd ansible && cd ansible/ && ansible-playbook deploy.yml -i hosts -u my_user`
+4. Run the ansible playbook ansible/deploy.yml  
+`cd ansible && cd ansible/ && ansible-playbook deploy.yml -i hosts -u my_user`  
+
+Note : Use "--ask-pass" and "--ask-become-pass" if ssh keys are not setup for "my_user" 
