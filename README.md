@@ -27,9 +27,9 @@ The application is coded in python3 using django framework. I have used gunicorn
 1. Use `git clone https://github.com/c-amar/sliceit.git` to clone the repo
 2. Edit the ansible/vars/var.yml and add the following details:
 
-   internal_ips: list of internal IPs
-   nginx_bind_ip: 'IP to bind nginx'
-   app_bind_ip: 'IP to bind app'
+internal_ips: list of internal IPs
+nginx_bind_ip: 'IP to bind nginx'
+app_bind_ip: 'IP to bind app'
 
 Example:
 ```yml
