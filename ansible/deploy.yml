@@ -1,9 +1,12 @@
 ---
  - hosts: nginx_server
-   remote_user: amar
    become: yes
    tasks:
      - include_vars: var.yml
+     - name: Install EPEL Repo
+       yum:
+         name: epel-release
+         state: present
      - name: Install nginx
        yum:
          name: nginx
@@ -22,13 +25,12 @@
          state: started
 
  - hosts: app_server
-   remote_user: amar
    become: yes
    tasks:
      - include_vars: var.yml
      - name: Install required packages
        yum:
-         name: ['python3', 'python3-setuptool', 'python-setuptools']
+         name: ['python3', 'python3-setuptools', 'python-setuptools']
          state: present
      - name: Create user for app
        user:
