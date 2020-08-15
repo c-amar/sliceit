@@ -1,0 +1,122 @@
+---
+# tasks file for nginx-hardening
+- name: config should not be worldwide read- or writeable
+  file:
+    path: "/etc/nginx"
+    mode: "o-rw"
+    owner: "root"
+    group: "root"
+    recurse: yes
+
+- name: change configuration in main nginx.conf
+  lineinfile:
+    dest: "/etc/nginx/nginx.conf"
+    regexp: '^\s*server_tokens'
+    line: "    server_tokens off;"
+    insertafter: "http {"
+  notify: restart nginx
+
+- name: change ssl_protocols in main nginx.conf
+  lineinfile:
+    dest: "/etc/nginx/nginx.conf"
+    regexp: '^\s*ssl_protocols'
+    line: "    ssl_protocols TLSv1.2 TLSv1.3;"
+    insertafter: "http {"
+  notify: restart nginx
+
+- name: change ssl_prefer_server_ciphers in main nginx.conf
+  lineinfile:
+     dest: "/etc/nginx/nginx.conf"
+     regexp: '^\s*ssl_prefer_server_ciphers'
+     line: "    ssl_prefer_server_ciphers on;"
+     insertafter: "http {"
+  notify: restart nginx
+
+- name: change client_max_body_size in main nginx.conf
+  lineinfile:
+    dest: "/etc/nginx/nginx.conf"
+    regexp: '^\s*client_max_body_size'
+    line: "    client_max_body_size 1k;"
+    insertafter: "http {"
+  notify: restart nginx
+
+- name: change client_body_buffer_size in main nginx.conf
+  lineinfile:
+    dest: "/etc/nginx/nginx.conf"
+    regexp: '^\s*client_body_buffer_size'
+    line: "    client_body_buffer_size 1k;"
+    insertafter: "http {"
+  notify: restart nginx
+
+- name: change keepalive_timeout in main nginx.conf
+  lineinfile:
+    dest: "/etc/nginx/nginx.conf"
+    regexp: '^\s*keepalive_timeout'
+    line: "    keepalive_timeout 5 5;"
+    insertafter: "http {"
+  notify: restart nginx
+
+#SSL configuration
+- name: Install pip
+  yum:
+    name: python-pip
+    state: present
+- name: Ensure python OpenSSL dependencies are installed.
+  pip:
+    name: pyOpenSSL
+    state: present
+
+- name: Create Private Key
+  openssl_privatekey:
+    path: /etc/nginx/sliceit.key
+    size: 2048
+
+- name: Create CSR
+  openssl_csr:
+    path: /etc/nginx/sliceit.csr
+    privatekey_path: /etc/nginx/sliceit.key
+
+- name: Create SSL certificate
+  openssl_certificate:
+    path: /etc/nginx/sliceit.crt
+    privatekey_path: /etc/nginx/sliceit.key
+    csr_path: /etc/nginx/sliceit.csr
+    provider: selfsigned
+
+- name: Copy ssl-params.conf file
+  template:
+    src: ssl-params.conf.j2
+    dest: /etc/nginx/conf.d/ssl-params.conf
+
+- name: Change 80 to 443 
+  replace: 
+    path: /etc/nginx/conf.d/assg1.conf 
+    regexp: '(listen.*):80;' 
+    replace: '\1:443 ssl;'
+  notify: restart nginx
+
+- name: include the ssl params
+  lineinfile:
+    dest: "/etc/nginx/conf.d/assg1.conf"
+    insertafter: ':443 ssl;'
+    line: "    include  conf.d/ssl-params.conf;"
+  notify: restart nginx
+
+- name: Adding port 80 and redirecting to 443
+  blockinfile:
+    path: /etc/nginx/conf.d/assg1.conf
+    block: |
+      server {
+          listen 80;
+          listen [::]:80;
+          server_name 192.168.99.101;
+          return 302 https://$server_name$request_uri;
+      }
+  notify: restart nginx
+
+- name: Enable port 443 in firewall
+  firewalld:
+    port: 443/tcp
+    permanent: yes
+    state: enabled
+  notify: reload firewalld

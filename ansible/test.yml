@@ -1,0 +1,17 @@
+ - hosts: localhost
+   become: yes
+   gather_facts: no
+   tasks:
+    - openssl_privatekey:
+        path: /etc/nginx/sliceit.key
+        size: 2048 
+
+    - openssl_csr:
+        path: /etc/nginx/sliceit.csr
+        privatekey_path: /etc/nginx/sliceit.key
+
+    - openssl_certificate:
+        path: /etc/nginx/sliceit.crt
+        privatekey_path: /etc/nginx/sliceit.key
+        csr_path: /etc/nginx/sliceit.csr
+        provider: selfsigned

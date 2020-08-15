@@ -1,0 +1,6 @@
+---
+# handlers file for nginx_server
+- name: reload firewalld
+  systemd:
+    name: firewalld
+    state: reloaded

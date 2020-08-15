@@ -1,0 +1,10 @@
+---
+# handlers file for nginx-hardening
+- name: reload firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
+- name: restart nginx
+  systemd:
+    name: nginx
+    state: restarted

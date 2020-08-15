@@ -1,0 +1,12 @@
+[Unit]
+Description=gunicorn daemon
+After=network.target
+
+[Service]
+User=apprun
+Group=apprun
+WorkingDirectory=/opt/assg1
+ExecStart=/opt/venv/bin/gunicorn --access-logfile - --workers 3 --bind {{app_bind_ip}}:8000  assg1.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
